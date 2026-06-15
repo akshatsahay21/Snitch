@@ -41,4 +41,13 @@ router.post("/", authenticateSeller, upload.array("images", 7), createProductVal
  router.get("/", getAllProducts);
   
 
+ /**
+  * @route GET /api/products/detail/:id
+  * @desc Get product details by ID
+  * @access Public
+  */
+ router.get("/detail/:id", getProductDetails)
+ 
+  
+
 export default router;
