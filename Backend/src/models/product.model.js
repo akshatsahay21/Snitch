@@ -1,29 +1,23 @@
 import mongoose from 'mongoose';
+import priceSchema from "./price.schema.js";
 
 const productSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true,
+        required: true
     },
     description: {
         type: String,
-        required: true,
+        required: true
     },
     seller: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+        ref: 'user',
+        required: true
     },
     price: {
-        amount: {
-            type: Number,
-            required: true
-        },
-        currency: {
-            type: String,
-            enum: ['USD', 'EUR', 'GBP', 'JPY', 'INR'], // Extend as needed
-            default: "INR"
-        }
+        type: priceSchema,
+        required: true
     },
     images: [
         {
@@ -51,21 +45,14 @@ const productSchema = new mongoose.Schema({
                 type: Map,
                 of: String
             },
-                price:{
-                    amount: {
-                        type: Number,
-                        required: true
-                    },
-                    currency: {
-                        type: String,
-                        enum: ['USD', 'EUR', 'GBP', 'JPY', 'INR'], // Extend as needed
-                        default: "INR"
-                    }
-                }
+            price: {
+                type: priceSchema,
+            }
         },
-    ]
 
-}, { timestamps: true });
+    ]
+}, { timestamps: true })
+
 
 const productModel = mongoose.model('product', productSchema);
 
