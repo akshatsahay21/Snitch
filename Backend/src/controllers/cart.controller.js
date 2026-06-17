@@ -1,11 +1,13 @@
-import cartModel from '../models/cart.model.js';
-import productModel from '../models/product.model.js';
+import cartModel from "../models/cart.model.js";
+import productModel from "../models/product.model.js";
 import { stockOfVariant } from "../dao/product.dao.js";
 
+
 export const addToCart = async (req, res) => {
-    const { productId, variantId } = req.params;
-    const { quantity } = req.body;
-    
+
+    const { productId, variantId } = req.params
+    const { quantity = 1 } = req.body
+
     const product = await productModel.findOne({
         _id: productId,
         "variants._id": variantId
@@ -18,12 +20,14 @@ export const addToCart = async (req, res) => {
         })
     }
 
-    const stock = await stockOfVariant(productId, variantId);
-    const cart = (await cartModel.findOne({ user: req.user._id })) ||
-        (await cartModel.create({ user: req.user._id }));
+    const stock = await stockOfVariant(productId, variantId)
 
-        const isProductAlreadyInCart = cart.items.some(item => item.product.toString() === productId && item.variant?.toString() === variantId);
-          if (isProductAlreadyInCart) {
+    const cart = (await cartModel.findOne({ user: req.user._id })) ||
+        (await cartModel.create({ user: req.user._id }))
+
+    const isProductAlreadyInCart = cart.items.some(item => item.product.toString() === productId && item.variant?.toString() === variantId)
+
+    if (isProductAlreadyInCart) {
         const quantityInCart = cart.items.find(item => item.product.toString() === productId && item.variant?.toString() === variantId).quantity
         if (quantityInCart + quantity > stock) {
             return res.status(400).json({
@@ -41,8 +45,9 @@ export const addToCart = async (req, res) => {
         return res.status(200).json({
             message: "Cart updated successfully",
             success: true
-        })      
+        })
     }
+
     if (quantity > stock) {
         return res.status(400).json({
             message: `Only ${stock} items left in stock`,
@@ -56,21 +61,24 @@ export const addToCart = async (req, res) => {
         quantity,
         price: product.price
     })
-    await cart.save();
+
+    await cart.save()
 
     return res.status(200).json({
-        message: "Item added to cart successfully",
+        message: "Product added to cart successfully",
         success: true
-})
+    })
 }
 
 export const getCart = async (req, res) => {
     const user = req.user
+
     let cart = await cartModel.findOne({ user: user._id }).populate("items.product")
+
     if (!cart) {
         cart = await cartModel.create({ user: user._id })
-
     }
+
     return res.status(200).json({
         message: "Cart fetched successfully",
         success: true,
