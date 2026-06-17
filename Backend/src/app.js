@@ -2,11 +2,12 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import authRouter from "./routes/auth.routes.js";
+import productRouter from "./routes/product.routes.js";
+import cartRouter from "./routes/cart.routes.js";
 import cors from "cors";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20"
 import { config } from "./config/config.js";
-import productRouter from "./routes/product.routes.js";
 
 const app = express();
 
@@ -32,10 +33,10 @@ passport.use(new GoogleStrategy({
 }))
 
 app.get("/", (_req, res) => {
-    res.status(200).json({ message: "Server is running" });
+    res.status(200).json({ message: "Server is running and ready to go!" });
 });
 
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
-
+app.use("/api/cart", cartRouter);
 export default app;
