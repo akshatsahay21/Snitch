@@ -11,15 +11,15 @@ import SellerProductDetails from "../features/products/pages/SellerProductDetail
 export const routes = createBrowserRouter([
     {
         path: "/",
-        element: <Home />
+        element: <Home />,
     },
     {
         path: "/register",
-        element: <Register />
+        element: <Register />,
     },
     {
         path: "/login",
-        element: <Login />
+        element: <Login />,
     },
     {
         path: "/product/:productId",
@@ -31,22 +31,23 @@ export const routes = createBrowserRouter([
             {
                 path: "/seller/create-product",
 
-                element: <Protected role="seller">
+                element: <Protected role="seller" >
                     <CreateProduct />
                 </Protected>
             },
             {
                 path: "/seller/dashboard",
-                element: <Protected role="seller">
+                element: <Protected role="seller" >
                     <Dashboard />
                 </Protected>
             },
             {
                 path: "/seller/product/:productId",
-                element: <Protected role="seller">
+                element: <Protected role="seller" >
                     <SellerProductDetails />
                 </Protected>
             }
         ]
     }
-])  
+
+])
