@@ -37,15 +37,16 @@ const ProductDetail = () => {
 
     const activeVariant = useMemo(() => {
         if (!product?.variants || product.variants.length === 0) return null;
-        return product.variants.find(v => {
+        // Try to find an exact attribute match first
+        const match = product.variants.find(v => {
             if (!v.attributes) return false;
             const vKeys = Object.keys(v.attributes);
             const sKeys = Object.keys(selectedAttributes);
             const isMatch = vKeys.every(k => v.attributes[ k ] === selectedAttributes[ k ]);
-            // If they don't have exactly the same keys, they shouldn't perfectly match, 
-            // but we might only care about matching what's available.
             return vKeys.length === sKeys.length && isMatch;
         });
+        // Fall back to the first variant (handles products with no/empty attributes)
+        return match ?? product.variants[0];
     }, [ product, selectedAttributes ]);
 
 
@@ -107,8 +108,9 @@ const ProductDetail = () => {
 
     console.log(product)
 
-    // Fallbacks
-    const displayImages = (activeVariant?.images && activeVariant.images.length > 0)
+    // Only show variant images when the user has actively selected a variant via attribute buttons
+    const hasAttributes = Object.keys(availableAttributes).length > 0;
+    const displayImages = (hasAttributes && activeVariant?.images && activeVariant.images.length > 0)
         ? activeVariant.images
         : (product.images && product.images.length > 0 ? product.images : [ { url: '/snitch_editorial_warm.png' } ]);
 
@@ -255,24 +257,33 @@ const ProductDetail = () => {
                             <div className="flex flex-col gap-4 mt-auto">
                                 <button
                                     className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300"
+                                    disabled={!activeVariant}
                                     style={{
-                                        backgroundColor: '#1b1c1a',
+                                        backgroundColor: activeVariant ? '#1b1c1a' : '#b0a89e',
                                         color: '#fbf9f6',
-                                        fontFamily: "'Inter', sans-serif"
+                                        fontFamily: "'Inter', sans-serif",
+                                        cursor: activeVariant ? 'pointer' : 'not-allowed',
                                     }}
                                     onMouseEnter={e => {
+                                        if (!activeVariant) return;
                                         e.currentTarget.style.backgroundColor = '#C9A96E';
                                         e.currentTarget.style.color = '#1b1c1a';
                                     }}
                                     onMouseLeave={e => {
+                                        if (!activeVariant) return;
                                         e.currentTarget.style.backgroundColor = '#1b1c1a';
                                         e.currentTarget.style.color = '#fbf9f6';
                                     }}
-                                    onClick={() => {
-                                        handleAddItem({
-                                            productId: product._id,
-                                            variantId: activeVariant._id
-                                        })
+                                    onClick={async () => {
+                                        if (!activeVariant) return;
+                                        try {
+                                            await handleAddItem({
+                                                productId: product._id,
+                                                variantId: activeVariant._id
+                                            });
+                                        } catch (err) {
+                                            console.error('Failed to add to cart', err);
+                                        }
                                     }}
                                 >
                                     Add to Cart
