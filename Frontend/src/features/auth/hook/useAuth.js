@@ -30,7 +30,7 @@ export const useAuth = () => {
             dispatch(setUser(data.user))
             dispatch(setLoading(false))
         } catch (err){
-            console.log(err)
+            console.warn('[useAuth] /me failed — are you logged in?', err?.response?.status, err?.response?.data?.message)
             dispatch(setLoading(false))
         }
     }
