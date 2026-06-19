@@ -5,7 +5,12 @@ import userModel from "../models/user.model.js";
 
 
 export const authenticateUser = async (req, res, next) => {
-    const token = req.cookies.token
+    // Support both Bearer token (header) and cookie
+    const authHeader = req.headers["authorization"]
+    const token = (authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null)
+        ?? req.cookies.token
+
+    console.log("[Auth] cookies:", req.cookies, "| header token:", !!authHeader)
 
     if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -29,7 +34,9 @@ export const authenticateUser = async (req, res, next) => {
 }
 
 export const authenticateSeller = async (req, res, next) => {
-    const token = req.cookies.token;
+    const authHeader = req.headers["authorization"]
+    const token = (authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null)
+        ?? req.cookies.token;
 
     if (!token){
         return res.status(401).json({ message: "Unauthorized" });
@@ -45,9 +52,8 @@ export const authenticateSeller = async (req, res, next) => {
         }
         req.user = user;
         next();
-    } catch (err)
-{
+    } catch (err) {
         console.log(err)
         return res.status(401).json({ message: "Unauthorized" });
-  }
+    }
 }

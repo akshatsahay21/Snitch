@@ -17,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
     origin: "http://localhost:5173",
-    methods: [ "GET", "POST", "PUT", "DELETE" ],
+    methods: [ "GET", "POST", "PUT", "PATCH", "DELETE" ],
     credentials: true
 }))
 
@@ -32,9 +32,25 @@ passport.use(new GoogleStrategy({
     return done(null, profile);
 }))
 
+// DEBUG: log every incoming /api request headers
+app.use("/api", (req, _res, next) => {
+    console.log(`\n=== ${req.method} ${req.path} ===`)
+    console.log("  Authorization:", req.headers["authorization"] ?? "MISSING")
+    console.log("  Cookie:", req.headers["cookie"] ?? "MISSING")
+    next()
+})
+
 app.get("/", (_req, res) => {
     res.status(200).json({ message: "Server is running and ready to go!" });
 });
+
+// DEBUG: echo headers (open in browser to check proxy forwarding)
+app.get("/api/debug/headers", (req, res) => {
+    res.json({
+        authorization: req.headers["authorization"] ?? null,
+        cookie: req.headers["cookie"] ?? null,
+    })
+})
 
 app.use("/api/auth", authRouter);
 app.use("/api/products", productRouter);
