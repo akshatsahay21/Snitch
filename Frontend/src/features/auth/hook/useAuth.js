@@ -1,6 +1,7 @@
-import { setError, setLoading, setUser } from "../state/auth.slice"
-import { register, login, getMe } from "../service/auth.api"
+import { setError, setLoading, setUser, clearUser } from "../state/auth.slice"
+import { register, login, getMe, logout } from "../service/auth.api"
 import { useDispatch } from "react-redux"
+import { setCart } from "../../cart/state/cart.slice"
 
 
 
@@ -35,6 +36,12 @@ export const useAuth = () => {
         }
     }
 
-    return { handleRegister, handleLogin, handleGetMe }
+    function handleLogout() {
+        logout()                                // remove token from localStorage
+        dispatch(clearUser())                   // clear user from Redux
+        dispatch(setCart({ items: [], totalPrice: 0, currency: null }))  // clear cart
+    }
+
+    return { handleRegister, handleLogin, handleGetMe, handleLogout }
 
 }

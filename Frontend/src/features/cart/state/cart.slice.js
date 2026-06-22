@@ -21,15 +21,34 @@ const cartSlice = createSlice({
             const { productId, variantId } = action.payload
 
             state.items = state.items.map(item => {
-                if (item.product._id === productId && item.variant === variantId) {
+                // item.variant is a populated object — compare via ._id
+                const itemVariantId = item.variant?._id?.toString() ?? item.variant?.toString()
+                if (item.product._id === productId && itemVariantId === variantId) {
                     return { ...item, quantity: item.quantity + 1 }
-                } else {
-                    return item
                 }
+                return item
             })
+        },
+        decrementCartItem: (state, action) => {
+            const { productId, variantId, removed } = action.payload
+
+            if (removed) {
+                state.items = state.items.filter(item => {
+                    const itemVariantId = item.variant?._id?.toString() ?? item.variant?.toString()
+                    return !(item.product._id === productId && itemVariantId === variantId)
+                })
+            } else {
+                state.items = state.items.map(item => {
+                    const itemVariantId = item.variant?._id?.toString() ?? item.variant?.toString()
+                    if (item.product._id === productId && itemVariantId === variantId) {
+                        return { ...item, quantity: item.quantity - 1 }
+                    }
+                    return item
+                })
+            }
         }
     }
 })
 
-export const { setCart, addItem, incrementCartItem } = cartSlice.actions
-export default cartSlice.reducer
+export const { setCart, addItem, incrementCartItem, decrementCartItem } = cartSlice.actions
+export default cartSlice.reducer

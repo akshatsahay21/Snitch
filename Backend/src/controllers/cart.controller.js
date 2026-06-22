@@ -11,6 +11,24 @@ import { config } from "../config/config.js";
 
 
 
+const getUpdatedCartResponse = async (userId) => {
+    let cart = await getCartDetails(userId)
+    if (!cart) {
+        let cartDoc = await cartModel.findOne({ user: userId })
+        if (!cartDoc) {
+            cartDoc = await cartModel.create({ user: userId })
+        }
+        cart = {
+            _id: cartDoc._id,
+            user: cartDoc.user,
+            items: [],
+            totalPrice: 0,
+            currency: "INR"
+        }
+    }
+    return cart
+}
+
 export const addToCart = async (req, res) => {
 
     const { productId, variantId } = req.params
@@ -50,9 +68,11 @@ export const addToCart = async (req, res) => {
             { new: true }
         )
 
+        const updatedCart = await getUpdatedCartResponse(req.user._id)
         return res.status(200).json({
             message: "Cart updated successfully",
-            success: true
+            success: true,
+            cart: updatedCart
         })
     }
 
@@ -72,21 +92,16 @@ export const addToCart = async (req, res) => {
 
     await cart.save()
 
+    const updatedCart = await getUpdatedCartResponse(req.user._id)
     return res.status(200).json({
         message: "Product added to cart successfully",
-        success: true
+        success: true,
+        cart: updatedCart
     })
 }
 
 export const getCart = async (req, res) => {
-    const user = req.user
-
-    let cart = await getCartDetails(user._id)
-
-    if (!cart) {
-        cart = await cartModel.create({ user: user._id })
-    }
-
+    const cart = await getUpdatedCartResponse(req.user._id)
     return res.status(200).json({
         message: "Cart fetched successfully",
         success: true,
@@ -135,9 +150,76 @@ export const incrementCartItemQuantity = async (req, res) => {
         { new: true }
     )
 
+    const updatedCart = await getUpdatedCartResponse(req.user._id)
     return res.status(200).json({
         message: "Cart item quantity incremented successfully",
-        success: true
+        success: true,
+        cart: updatedCart
+    })
+}
+
+export const decrementCartItemQuantity = async (req, res) => {
+    const { productId, variantId } = req.params
+
+    const product = await productModel.findOne({
+        _id: productId,
+        "variants._id": variantId
+    })
+
+    if (!product) {
+        return res.status(404).json({
+            message: "Product or variant not found",
+            success: false
+        })
+    }
+
+    const cart = await cartModel.findOne({ user: req.user._id })
+
+    if (!cart) {
+        return res.status(404).json({
+            message: "Cart not found",
+            success: false
+        })
+    }
+
+    const cartItem = cart.items.find(
+        item => item.product.toString() === productId && item.variant?.toString() === variantId
+    )
+
+    if (!cartItem) {
+        return res.status(404).json({
+            message: "Item not found in cart",
+            success: false
+        })
+    }
+
+    // If quantity is 1, remove the item entirely
+    if (cartItem.quantity <= 1) {
+        await cartModel.findOneAndUpdate(
+            { user: req.user._id },
+            { $pull: { items: { product: productId, variant: variantId } } },
+            { new: true }
+        )
+        const updatedCart = await getUpdatedCartResponse(req.user._id)
+        return res.status(200).json({
+            message: "Item removed from cart",
+            success: true,
+            removed: true,
+            cart: updatedCart
+        })
+    }
+
+    await cartModel.findOneAndUpdate(
+        { user: req.user._id, "items.product": productId, "items.variant": variantId },
+        { $inc: { "items.$.quantity": -1 } },
+        { new: true }
+    )
+
+    const updatedCart = await getUpdatedCartResponse(req.user._id)
+    return res.status(200).json({
+        message: "Cart item quantity decremented successfully",
+        success: true,
+        cart: updatedCart
     })
 }
 

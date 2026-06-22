@@ -18,7 +18,28 @@ const userSchema = new mongoose.Schema({
     },
     googleId: {
         type: String,
-    }
+    },
+    avatar: {
+        type: String,
+        default: null
+    },
+    addresses: [
+        {
+            label: { type: String, default: "Home" },
+            line1: { type: String, required: true },
+            line2: { type: String },
+            city: { type: String, required: true },
+            state: { type: String, required: true },
+            pincode: { type: String, required: true },
+            isDefault: { type: Boolean, default: false }
+        }
+    ],
+    wishlist: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'product'
+        }
+    ]
 })
 
 userSchema.pre("save", async function () {

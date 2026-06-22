@@ -50,7 +50,7 @@ const Register = () => {
             />
 
             <div
-                className="min-h-screen flex flex-col lg:flex-row selection:bg-[#C9A96E]/30"
+                className="h-screen overflow-hidden flex flex-col lg:flex-row selection:bg-[#C9A96E]/30"
                 style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
             >
                 {/* ── LEFT: Editorial Image Panel ── */}
@@ -89,13 +89,13 @@ const Register = () => {
 
                 {/* ── RIGHT: Form Panel ── */}
                 <div
-                    className="w-full lg:w-1/2 flex items-center justify-center min-h-screen px-8 sm:px-14 lg:px-20 py-16 overflow-y-auto"
+                    className="w-full lg:w-1/2 flex items-center justify-center h-full overflow-hidden px-8 sm:px-14 lg:px-20 py-6"
                     style={{ backgroundColor: '#fbf9f6' }}
                 >
                     <div className="w-full max-w-sm">
 
                         {/* Mobile brand mark */}
-                        <div className="lg:hidden mb-14">
+                        <div className="lg:hidden mb-5">
                             <span
                                 className="text-sm tracking-[0.35em] uppercase"
                                 style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
@@ -105,7 +105,7 @@ const Register = () => {
                         </div>
 
                         {/* Header */}
-                        <div className="mb-12">
+                        <div className="mb-6">
                             <p
                                 className="text-[10px] uppercase tracking-[0.22em] mb-4 font-medium"
                                 style={{ color: '#C9A96E' }}
@@ -121,7 +121,7 @@ const Register = () => {
                         </div>
 
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-9">
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
                             {/* Full Name */}
                             <div className="flex flex-col gap-2">
@@ -259,7 +259,7 @@ const Register = () => {
                             {/* Sign Up Button */}
                             <button
                                 type="submit"
-                                className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 mt-2"
+                                className="w-full py-3 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300"
                                 style={{ backgroundColor: '#1b1c1a', color: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
                                 onMouseEnter={e => {
                                     e.currentTarget.style.backgroundColor = '#C9A96E';

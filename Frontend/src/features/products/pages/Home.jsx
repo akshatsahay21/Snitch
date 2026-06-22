@@ -1,19 +1,22 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useProduct } from '../hooks/useProduct';
-import { Link } from 'react-router';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import Footer from '../../Shared/Components/Footer';
+import PromoBanner from '../../Shared/Components/PromoBanner';
 
 const Home = () => {
     const products = useSelector(state => state.product.products);
     const user = useSelector(state => state.auth.user);
     const { handleGetAllProducts } = useProduct();
+    const [searchParams] = useSearchParams();
+    const searchQuery = searchParams.get('q') ?? '';
 
     const navigate = useNavigate();
 
     useEffect(() => {
-        handleGetAllProducts();
-    }, []);
+        handleGetAllProducts(searchQuery);
+    }, [searchQuery]);
 
     return (
         <>
@@ -31,20 +34,53 @@ const Home = () => {
 
                 <div className="max-w-7xl mx-auto px-8 lg:px-16 xl:px-24">
                     {/* ── Hero / Header ── */}
-                    <div className="pt-20 pb-20 text-center flex flex-col items-center">
+                    <div className="pt-10 pb-10 text-center flex flex-col items-center">
                         <span className="text-[10px] uppercase tracking-[0.24em] font-medium mb-6" style={{ color: '#C9A96E' }}>
-                            The Collection
+                            {searchQuery ? 'Search Results' : 'The Collection'}
                         </span>
                         <h1
-                            className="text-5xl lg:text-7xl font-light leading-tight mb-6"
+                            className="text-4xl lg:text-5xl font-light leading-tight mb-6"
                             style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1b1c1a' }}
                         >
-                            Curated Archive
+                            {searchQuery ? `"${searchQuery}"` : 'Curated Archive'}
                         </h1>
-                        <p className="max-w-xl mx-auto text-sm leading-relaxed" style={{ color: '#7A6E63' }}>
-                            Discover our latest curation of premium minimalist pieces, meticulously designed for effortless elegance and enduring quality.
-                        </p>
+                        {!searchQuery && (
+                            <p className="max-w-xl mx-auto text-sm leading-relaxed" style={{ color: '#7A6E63' }}>
+                                Discover our latest curation of premium minimalist pieces, meticulously designed for effortless elegance and enduring quality.
+                            </p>
+                        )}
+                        {searchQuery && (
+                            <p className="text-[11px] uppercase tracking-[0.18em]" style={{ color: '#B5ADA3' }}>
+                                {products.length} {products.length === 1 ? 'result' : 'results'} found
+                            </p>
+                        )}
+
+                        {/* ── Search Bar ── */}
+                        <div className="mt-8 w-full max-w-md mx-auto relative">
+                            <input
+                                type="text"
+                                placeholder="Search for products..."
+                                defaultValue={searchQuery}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        if (e.target.value.trim()) {
+                                            navigate(`/?q=${encodeURIComponent(e.target.value.trim())}`);
+                                        } else {
+                                            navigate('/');
+                                        }
+                                    }
+                                }}
+                                className="w-full bg-[#f5f3f0] border-none rounded-full py-3 px-6 text-sm placeholder:text-[#B5ADA3] focus:ring-1 focus:ring-[#C9A96E] outline-none"
+                                style={{ color: '#1b1c1a' }}
+                            />
+                            <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B5ADA3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
                     </div>
+
+                    {/* ── Promo Banner ── */}
+                    {!searchQuery && <PromoBanner />}
 
                     {/* ── Product Grid ── */}
                     {products && products.length > 0 ? (
@@ -109,14 +145,7 @@ const Home = () => {
                 </div>
 
                 {/* ── Footer ── */}
-                <footer className="border-t py-12 text-center" style={{ borderColor: '#e4e2df' }}>
-                    <span
-                        className="text-[10px] uppercase tracking-[0.35em]"
-                        style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
-                    >
-                        Snitch. © {new Date().getFullYear()}
-                    </span>
-                </footer>
+                <Footer />
             </div>
         </>
     );

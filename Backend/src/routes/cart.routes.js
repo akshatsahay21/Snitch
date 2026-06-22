@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticateUser } from '../middlewares/auth.middleware.js';
 import { validateAddToCart, validateIncrementCartItemQuantity } from '../validator/cart.validator.js';
-import { addToCart, createOrderController, getCart, incrementCartItemQuantity, verifyOrderController } from '../controllers/cart.controller.js';
+import { addToCart, createOrderController, getCart, incrementCartItemQuantity, decrementCartItemQuantity, verifyOrderController } from '../controllers/cart.controller.js';
 
 
 const router = express.Router();
@@ -35,6 +35,8 @@ router.get('/', authenticateUser, getCart)
  * @argument variantId - ID of the variant to update
  */
 router.patch("/quantity/increment/:productId/:variantId", authenticateUser, validateIncrementCartItemQuantity, incrementCartItemQuantity)
+
+router.patch("/quantity/decrement/:productId/:variantId", authenticateUser, decrementCartItemQuantity)
 
 
 /**

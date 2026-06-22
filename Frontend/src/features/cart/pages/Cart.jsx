@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useCart } from '../hook/useCart'
 import { Link, useNavigate } from 'react-router'
@@ -23,25 +23,14 @@ const tokens = {
 
 const Cart = () => {
     const cart = useSelector(state => state.cart)
-    const { handleGetCart, handleIncrementCartItem, handleCreateCartOrder, handleVerifyCartOrder } = useCart()
+    const { handleGetCart, handleIncrementCartItem, handleDecrementCartItem, handleCreateCartOrder, handleVerifyCartOrder } = useCart()
     const navigate = useNavigate()
     const { error, isLoading, Razorpay } = useRazorpay();
     const user = useSelector(state => state.user)
 
-    /* Local quantity state — key: cartItem._id, value: number */
-    const [ quantities, setQuantities ] = useState({})
-
     useEffect(() => {
         handleGetCart()
     }, [])
-
-
-    const changeQty = (id, delta) => {
-        setQuantities(prev => ({
-            ...prev,
-            [ id ]: Math.max(1, (prev[ id ] ?? 1) + delta),
-        }))
-    }
     /* ─── Helpers ─── */
     const getVariantDetails = (product, variantId) => {
         if (!product?.variants || !variantId) return null
@@ -104,26 +93,6 @@ const Cart = () => {
                     className="min-h-screen flex flex-col"
                     style={{ backgroundColor: tokens.surface, fontFamily: "'Inter', sans-serif" }}
                 >
-                    {/* Nav */}
-                    <nav
-                        className="px-8 lg:px-16 xl:px-24 pt-10 pb-6 flex items-center justify-between"
-                        style={{ borderBottom: `1px solid ${tokens.surfaceHighest}` }}
-                    >
-                        <Link
-                            to="/"
-                            className="text-sm font-medium tracking-[0.35em] uppercase hover:opacity-80 transition-opacity"
-                            style={{ fontFamily: "'Cormorant Garamond', serif", color: tokens.primary }}
-                        >
-                            Snitch.
-                        </Link>
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="text-[10px] uppercase tracking-[0.22em] font-medium transition-colors hover:opacity-70"
-                            style={{ color: tokens.secondary }}
-                        >
-                            Return to Archive
-                        </button>
-                    </nav>
 
                     <div className="flex-1 flex flex-col items-center justify-center gap-6 pb-24 px-8">
                         <p
@@ -207,11 +176,12 @@ const Cart = () => {
                             {/* ── Cart Item List ── */}
                             <div className="flex flex-col gap-6">
                                 {cart.items.map(item => {
-                                    const { product, variant: variantId, price, product: { _id } } = item
+                                    const { product, variant: variantId, price } = item
+                                    const productId = product._id
                                     const variantDetail = getVariantDetails(product, variantId)
                                     const imageUrl = getDisplayImage(product, variantDetail)
                                     const displayPrice = price ?? variantDetail?.price ?? product?.price
-                                    const qty = quantities[ _id ] ?? item.quantity ?? 1
+                                    const qty = item.quantity ?? 1
                                     const attributes = variantDetail?.attributes ?? {}
                                     const stock = variantDetail?.stock
                                     const variantPrice = variantDetail?.price
@@ -219,7 +189,7 @@ const Cart = () => {
 
                                     return (
                                         <div
-                                            key={_id}
+                                            key={productId}
                                             className="flex gap-6 md:gap-8 p-6 md:p-8 transition-all duration-300"
                                             style={{ backgroundColor: tokens.surfaceLow }}
                                         >
@@ -318,8 +288,8 @@ const Cart = () => {
                                                         style={{ border: `1px solid ${tokens.outlineVariant}` }}
                                                     >
                                                         <button
-                                                            id={`qty-dec-${_id}`}
-                                                            onClick={() => changeQty(_id, -1)}
+                                                            id={`qty-dec-${productId}`}
+                                                            onClick={() => handleDecrementCartItem({ productId, variantId: variantId?._id?.toString() ?? variantId?.toString() })}
                                                             className="w-9 h-9 flex items-center justify-center text-sm font-light transition-colors hover:opacity-60"
                                                             style={{ color: tokens.onSurface, borderRight: `1px solid ${tokens.outlineVariant}` }}
                                                             aria-label="Decrease quantity"
@@ -333,8 +303,8 @@ const Cart = () => {
                                                             {qty}
                                                         </span>
                                                         <button
-                                                            id={`qty-inc-${_id}`}
-                                                            onClick={() => handleIncrementCartItem({ productId: _id, variantId })}
+                                                            id={`qty-inc-${productId}`}
+                                                            onClick={() => handleIncrementCartItem({ productId, variantId: variantId?._id?.toString() ?? variantId?.toString() })}
                                                             className="w-9 h-9 flex items-center justify-center text-sm font-light transition-colors hover:opacity-60"
                                                             style={{ color: tokens.onSurface, borderLeft: `1px solid ${tokens.outlineVariant}` }}
                                                             aria-label="Increase quantity"
@@ -345,7 +315,7 @@ const Cart = () => {
 
                                                     {/* Remove */}
                                                     <button
-                                                        id={`remove-${_id}`}
+                                                        id={`remove-${productId}`}
                                                         className="text-[10px] uppercase tracking-[0.22em] font-medium transition-all duration-200 hover:underline hover:opacity-70"
                                                         style={{ color: tokens.muted }}
                                                     >

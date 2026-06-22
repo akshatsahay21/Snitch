@@ -48,7 +48,10 @@ export async function getSellerProducts(req, res) {
 }
 
 export async function getAllProducts(req, res) {
-    const products = await productModel.find()
+    const { q } = req.query
+    const filter = q ? { $text: { $search: q } } : {}
+
+    const products = await productModel.find(filter)
 
     return res.status(200).json({
         message: "Products fetched successfully",
@@ -105,28 +108,96 @@ export async function addProductVariant(req, res) {
         }))).map(image => images.push(image))
     }
 
-    const price = req.body.priceAmount
-    const stock = req.body.stock
-    const attributes = JSON.parse(req.body.attributes || "{}")
+    const variantsData = req.body.variantsData ? JSON.parse(req.body.variantsData) : null;
 
-    console.log(price)
+    if (variantsData && Array.isArray(variantsData)) {
+        variantsData.forEach(v => {
+            product.variants.push({
+                images,
+                price: {
+                    amount: Number(v.priceAmount) || product.price.amount,
+                    currency: req.body.priceCurrency || product.price.currency
+                },
+                stock: Number(v.stock) || 0,
+                attributes: v.attributes || {}
+            });
+        });
+    } else {
+        // Fallback for single variant addition
+        const price = req.body.priceAmount;
+        const stock = req.body.stock;
+        const attributes = JSON.parse(req.body.attributes || "{}");
 
-    product.variants.push({
-        images,
-        price: {
-            amount: Number(price) || product.price.amount,
-            currency: req.body.priceCurrency || product.price.currency
-        },
-        stock,
-        attributes
-    })
+        product.variants.push({
+            images,
+            price: {
+                amount: Number(price) || product.price.amount,
+                currency: req.body.priceCurrency || product.price.currency
+            },
+            stock,
+            attributes
+        });
+    }
 
     await product.save();
 
     return res.status(200).json({
-        message: "Product variant added successfully",
+        message: "Product variants added successfully",
+        success: true,
+        product
+    });
+}
+
+export async function deleteProduct(req, res) {
+    const { productId } = req.params
+
+    const product = await productModel.findOne({
+        _id: productId,
+        seller: req.user._id
+    })
+
+    if (!product) {
+        return res.status(404).json({
+            message: "Product not found or you don't have permission",
+            success: false
+        })
+    }
+
+    await productModel.findByIdAndDelete(productId)
+
+    return res.status(200).json({
+        message: "Product deleted successfully",
+        success: true
+    })
+}
+
+export async function updateProduct(req, res) {
+    const { productId } = req.params
+    const { title, description, priceAmount, priceCurrency, category } = req.body
+
+    const product = await productModel.findOne({
+        _id: productId,
+        seller: req.user._id
+    })
+
+    if (!product) {
+        return res.status(404).json({
+            message: "Product not found or you don't have permission",
+            success: false
+        })
+    }
+
+    if (title) product.title = title
+    if (description) product.description = description
+    if (priceAmount) product.price.amount = Number(priceAmount)
+    if (priceCurrency) product.price.currency = priceCurrency
+    if (category) product.category = category
+
+    await product.save()
+
+    return res.status(200).json({
+        message: "Product updated successfully",
         success: true,
         product
     })
-
 }

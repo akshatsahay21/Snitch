@@ -10,6 +10,9 @@ import SellerProductDetails from "../features/products/pages/SellerProductDetail
 import Cart from "../features/cart/pages/Cart";
 import AppLayout from "./Applayout";
 import OrderSuccess from "../features/cart/pages/OrderSuccess";
+import AccountSettings from "../features/account/pages/AccountSettings";
+import WishlistPage from "../features/account/pages/WishlistPage";
+import OrderHistory from "../features/account/pages/OrderHistory";
 
 export const routes = createBrowserRouter([
 
@@ -26,11 +29,11 @@ export const routes = createBrowserRouter([
         children: [
             {
                 path: "/",
-                element: <Home />,
+                element: <Protected><Home /></Protected>,
             },
             {
                 path: "/product/:productId",
-                element: <ProductDetail />
+                element: <Protected><ProductDetail /></Protected>
             },
             {
                 path: "/cart",
@@ -38,7 +41,19 @@ export const routes = createBrowserRouter([
             },
             {
                 path: "/order-success",
-                element: <OrderSuccess />
+                element: <Protected><OrderSuccess /></Protected>
+            },
+            {
+                path: "/account",
+                element: <Protected><AccountSettings /></Protected>
+            },
+            {
+                path: "/account/wishlist",
+                element: <Protected><WishlistPage /></Protected>
+            },
+            {
+                path: "/account/orders",
+                element: <Protected><OrderHistory /></Protected>
             },
             {
                 path: "/seller",

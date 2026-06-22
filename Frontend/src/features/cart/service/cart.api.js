@@ -29,6 +29,15 @@ export const incrementCartItemApi = async ({ productId, variantId }) => {
     return response.data
 }
 
+export const decrementCartItemApi = async ({ productId, variantId }) => {
+    const response = await api.patch(
+        `/api/cart/quantity/decrement/${productId}/${variantId}`,
+        undefined,
+        { headers: authHeader() }
+    )
+    return response.data
+}
+
 export const createCartOrder = async () => {
     const token = localStorage.getItem("token")
     console.log("[createCartOrder] token from localStorage:", token ? "EXISTS" : "MISSING")

@@ -37,11 +37,20 @@ export async function getCartDetails(userId) {
                     price: {
                         $multiply: [
                             '$items.quantity',
-                            '$items.product.variants.price.amount'
+                            {
+                                $ifNull: [
+                                    '$items.product.variants.price.amount',
+                                    '$items.product.price.amount'
+                                ]
+                            }
                         ]
                     },
-                    currency:
-                        '$items.product.variants.price.currency'
+                    currency: {
+                        $ifNull: [
+                            '$items.product.variants.price.currency',
+                            '$items.product.price.currency'
+                        ]
+                    }
                 }
             }
         },

@@ -40,7 +40,7 @@ const Login = () => {
             />
 
             <div
-                className="min-h-screen flex flex-col lg:flex-row selection:bg-[#C9A96E]/30"
+                className="h-screen overflow-hidden flex flex-col lg:flex-row selection:bg-[#C9A96E]/30"
                 style={{ backgroundColor: '#fbf9f6', fontFamily: "'Inter', sans-serif" }}
             >
                 {/* ── LEFT: Editorial Image Panel ── */}
@@ -82,13 +82,13 @@ const Login = () => {
 
                 {/* ── RIGHT: Form Panel ── */}
                 <div
-                    className="w-full lg:w-1/2 flex items-center justify-center min-h-screen px-8 sm:px-14 lg:px-20 py-16"
+                    className="w-full lg:w-1/2 flex items-center justify-center h-full overflow-hidden px-8 sm:px-14 lg:px-20 py-8"
                     style={{ backgroundColor: '#fbf9f6' }}
                 >
                     <div className="w-full max-w-sm">
 
                         {/* Mobile brand mark */}
-                        <div className="lg:hidden mb-14">
+                        <div className="lg:hidden mb-6">
                             <span
                                 className="text-sm tracking-[0.35em] uppercase"
                                 style={{ fontFamily: "'Cormorant Garamond', serif", color: '#C9A96E' }}
@@ -98,7 +98,7 @@ const Login = () => {
                         </div>
 
                         {/* Header */}
-                        <div className="mb-14">
+                        <div className="mb-8">
                             <p
                                 className="text-[10px] uppercase tracking-[0.22em] mb-4 font-medium"
                                 style={{ color: '#C9A96E' }}
@@ -114,7 +114,7 @@ const Login = () => {
                         </div>
 
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
                             {/* Email */}
                             <div className="flex flex-col gap-2">
@@ -186,7 +186,7 @@ const Login = () => {
                             {/* Sign In Button */}
                             <button
                                 type="submit"
-                                className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 mt-2"
+                                className="w-full py-3 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300"
                                 style={{
                                     backgroundColor: '#1b1c1a',
                                     color: '#fbf9f6',

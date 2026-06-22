@@ -1,6 +1,6 @@
-import { addItem, getCart, incrementCartItemApi, createCartOrder, verifyCartOrder } from "../service/cart.api"
+import { addItem, getCart, incrementCartItemApi, decrementCartItemApi, createCartOrder, verifyCartOrder } from "../service/cart.api"
 import { useDispatch } from "react-redux"
-import { setCart, incrementCartItem } from "../state/cart.slice"
+import { setCart, incrementCartItem, decrementCartItem } from "../state/cart.slice"
 
 
 export const useCart = () => {
@@ -9,7 +9,9 @@ export const useCart = () => {
 
     async function handleAddItem({ productId, variantId }) {
         const data = await addItem({ productId, variantId })
-
+        if (data.success && data.cart) {
+            dispatch(setCart(data.cart))
+        }
         return data
     }
 
@@ -20,8 +22,21 @@ export const useCart = () => {
     }
 
     async function handleIncrementCartItem({ productId, variantId }) {
-        await incrementCartItemApi({ productId, variantId })
-        dispatch(incrementCartItem({ productId, variantId }))
+        const data = await incrementCartItemApi({ productId, variantId })
+        if (data.success && data.cart) {
+            dispatch(setCart(data.cart))
+        } else {
+            dispatch(incrementCartItem({ productId, variantId }))
+        }
+    }
+
+    async function handleDecrementCartItem({ productId, variantId }) {
+        const data = await decrementCartItemApi({ productId, variantId })
+        if (data.success && data.cart) {
+            dispatch(setCart(data.cart))
+        } else {
+            dispatch(decrementCartItem({ productId, variantId, removed: !!data.removed }))
+        }
     }
 
     async function handleCreateCartOrder() {
@@ -34,6 +49,6 @@ export const useCart = () => {
         return data.success
     }
 
-    return { handleAddItem, handleGetCart, handleIncrementCartItem, handleCreateCartOrder, handleVerifyCartOrder }
+    return { handleAddItem, handleGetCart, handleIncrementCartItem, handleDecrementCartItem, handleCreateCartOrder, handleVerifyCartOrder }
 
-}
+}

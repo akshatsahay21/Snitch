@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
+import paymentModel from "../models/payment.model.js";
 
 async function sendTokenResponse(user, res, message) {
   const token = jwt.sign(
@@ -131,6 +132,107 @@ export const getMe = async (req, res) => {
       contact: user.contact,
       fullname: user.fullname,
       role: user.role,
+      addresses: user.addresses,
+      wishlist: user.wishlist,
     },
+  });
+};
+
+export const updateProfile = async (req, res) => {
+  const { fullname, contact } = req.body;
+  const user = req.user;
+
+  if (fullname) user.fullname = fullname;
+  if (contact) user.contact = contact;
+
+  await user.save();
+
+  res.status(200).json({
+    message: "Profile updated successfully",
+    success: true,
+    user: {
+      id: user._id,
+      email: user.email,
+      contact: user.contact,
+      fullname: user.fullname,
+      role: user.role,
+      addresses: user.addresses,
+    },
+  });
+};
+
+export const addAddress = async (req, res) => {
+  const { label, line1, line2, city, state, pincode, isDefault } = req.body;
+  const user = req.user;
+
+  if (isDefault) {
+    user.addresses = user.addresses.map(addr => ({ ...addr.toObject(), isDefault: false }));
+  }
+
+  user.addresses.push({ label, line1, line2, city, state, pincode, isDefault: !!isDefault });
+  await user.save();
+
+  res.status(201).json({
+    message: "Address added successfully",
+    success: true,
+    addresses: user.addresses,
+  });
+};
+
+export const deleteAddress = async (req, res) => {
+  const { addressId } = req.params;
+  const user = req.user;
+
+  user.addresses = user.addresses.filter(addr => addr._id.toString() !== addressId);
+  await user.save();
+
+  res.status(200).json({
+    message: "Address deleted successfully",
+    success: true,
+    addresses: user.addresses,
+  });
+};
+
+export const toggleWishlist = async (req, res) => {
+  const { productId } = req.params;
+  const user = await userModel.findById(req.user._id);
+
+  const index = user.wishlist.findIndex(id => id.toString() === productId);
+
+  if (index === -1) {
+    user.wishlist.push(productId);
+  } else {
+    user.wishlist.splice(index, 1);
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    message: index === -1 ? "Added to wishlist" : "Removed from wishlist",
+    success: true,
+    wishlisted: index === -1,
+    wishlist: user.wishlist,
+  });
+};
+
+export const getWishlist = async (req, res) => {
+  const user = await userModel.findById(req.user._id).populate("wishlist");
+
+  res.status(200).json({
+    message: "Wishlist fetched successfully",
+    success: true,
+    wishlist: user.wishlist,
+  });
+};
+
+export const getMyOrders = async (req, res) => {
+  const orders = await paymentModel
+    .find({ user: req.user._id })
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    message: "Orders fetched successfully",
+    success: true,
+    orders,
   });
 };
