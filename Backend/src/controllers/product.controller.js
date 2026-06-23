@@ -48,10 +48,24 @@ export async function getSellerProducts(req, res) {
 }
 
 export async function getAllProducts(req, res) {
-    const { q } = req.query
-    const filter = q ? { $text: { $search: q } } : {}
+    const { q, category, minPrice, maxPrice, sort } = req.query;
+    const filter = {};
 
-    const products = await productModel.find(filter)
+    if (q) filter.$text = { $search: q };
+    if (category) filter.category = category;
+    
+    if (minPrice || maxPrice) {
+        filter['price.amount'] = {};
+        if (minPrice) filter['price.amount'].$gte = Number(minPrice);
+        if (maxPrice) filter['price.amount'].$lte = Number(maxPrice);
+    }
+
+    let sortOptions = {};
+    if (sort === 'price_asc') sortOptions = { 'price.amount': 1 };
+    else if (sort === 'price_desc') sortOptions = { 'price.amount': -1 };
+    else if (sort === 'newest') sortOptions = { createdAt: -1 };
+
+    const products = await productModel.find(filter).sort(sortOptions);
 
     return res.status(200).json({
         message: "Products fetched successfully",

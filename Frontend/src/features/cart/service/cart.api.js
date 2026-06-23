@@ -7,8 +7,9 @@ function authHeader() {
 }
 
 export const addItem = async ({ productId, variantId }) => {
+    const url = variantId ? `/api/cart/add/${productId}/${variantId}` : `/api/cart/add/${productId}`;
     const response = await api.post(
-        `/api/cart/add/${productId}/${variantId}`,
+        url,
         { quantity: 1 },
         { headers: authHeader() }
     )
@@ -21,8 +22,9 @@ export const getCart = async () => {
 }
 
 export const incrementCartItemApi = async ({ productId, variantId }) => {
+    const url = variantId ? `/api/cart/quantity/increment/${productId}/${variantId}` : `/api/cart/quantity/increment/${productId}`;
     const response = await api.patch(
-        `/api/cart/quantity/increment/${productId}/${variantId}`,
+        url,
         undefined,
         { headers: authHeader() }
     )
@@ -30,8 +32,9 @@ export const incrementCartItemApi = async ({ productId, variantId }) => {
 }
 
 export const decrementCartItemApi = async ({ productId, variantId }) => {
+    const url = variantId ? `/api/cart/quantity/decrement/${productId}/${variantId}` : `/api/cart/quantity/decrement/${productId}`;
     const response = await api.patch(
-        `/api/cart/quantity/decrement/${productId}/${variantId}`,
+        url,
         undefined,
         { headers: authHeader() }
     )

@@ -49,18 +49,11 @@ export default function OrderHistory() {
                 className="min-h-screen pb-24"
                 style={{ backgroundColor: tokens.surface, fontFamily: "'Inter', sans-serif" }}
             >
-                {/* Top Nav */}
+                {/* Sub Nav */}
                 <nav
-                    className="px-8 lg:px-16 xl:px-24 pt-10 pb-6 flex items-center justify-between"
+                    className="px-8 lg:px-16 xl:px-24 pt-10 pb-6 flex items-center justify-end"
                     style={{ borderBottom: `1px solid ${tokens.surfaceHighest}` }}
                 >
-                    <Link
-                        to="/"
-                        className="text-sm font-medium tracking-[0.35em] uppercase hover:opacity-80 transition-opacity"
-                        style={{ fontFamily: "'Cormorant Garamond', serif", color: tokens.primary }}
-                    >
-                        Snitch.
-                    </Link>
                     <div className="flex gap-6 text-[10px] uppercase tracking-[0.2em]" style={{ color: tokens.secondary }}>
                         <Link to="/account" className="hover:opacity-70 transition-opacity">Profile</Link>
                         <Link to="/account/wishlist" className="hover:opacity-70 transition-opacity">Wishlist</Link>

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
 import { useProduct } from '../hooks/useProduct';
 import { useCart } from '../../cart/hook/useCart';
+import { useWishlist } from '../../wishlist/hook/useWishlist';
 
 const ProductDetail = () => {
     const { productId } = useParams();
@@ -10,7 +11,8 @@ const ProductDetail = () => {
     const [ selectedAttributes, setSelectedAttributes ] = useState({});
     const navigate = useNavigate();
     const { handleGetProductById } = useProduct();
-    const { handleAddItem } = useCart()
+    const { handleAddItem } = useCart();
+    const { wishlist, handleGetWishlist, handleToggleWishlistItem } = useWishlist();
 
 
 
@@ -28,7 +30,8 @@ const ProductDetail = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
         fetchProductDetails();
-    }, [ productId ]);
+        handleGetWishlist();
+    }, [ productId, handleGetWishlist ]);
 
     const activeVariant = useMemo(() => {
         if (!product?.variants || product.variants.length === 0) return null;
@@ -119,6 +122,8 @@ const ProductDetail = () => {
     const displayPrice = activeVariant?.price?.amount
         ? activeVariant.price
         : product.price;
+
+    const isInWishlist = wishlist.some(item => typeof item === 'object' ? item._id === product._id : item === product._id);
 
     return (
         <>
@@ -240,14 +245,17 @@ const ProductDetail = () => {
                             <div className="flex gap-4 mt-2">
                                 <button
                                     className="flex-1 py-4 px-6 text-sm font-bold uppercase tracking-wide rounded text-white flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    disabled={!activeVariant || activeVariant.stock === 0}
+                                    disabled={hasAttributes ? (!activeVariant || activeVariant.stock === 0) : false}
                                     style={{ backgroundColor: '#FF3E6C' }}
                                     onClick={async () => {
-                                        if (!activeVariant) return;
+                                        if (hasAttributes && !activeVariant) {
+                                            alert("Please select options before adding to bag");
+                                            return;
+                                        }
                                         try {
                                             await handleAddItem({
                                                 productId: product._id,
-                                                variantId: activeVariant._id
+                                                variantId: activeVariant?._id
                                             });
                                         } catch (err) {
                                             console.error('Failed to add to cart', err);
@@ -255,13 +263,16 @@ const ProductDetail = () => {
                                     }}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                                    ADD TO BAG
+                                    {hasAttributes && !activeVariant ? 'SELECT OPTIONS' : (hasAttributes && activeVariant?.stock === 0 ? 'OUT OF STOCK' : 'ADD TO BAG')}
                                 </button>
                                 <button
-                                    className="flex-1 py-4 px-6 text-sm font-bold uppercase tracking-wide rounded bg-white text-gray-800 border border-gray-300 flex items-center justify-center gap-2 transition-colors hover:border-gray-500"
+                                    onClick={() => handleToggleWishlistItem(product._id)}
+                                    className={`flex-1 py-4 px-6 text-sm font-bold uppercase tracking-wide rounded border flex items-center justify-center gap-2 transition-colors ${isInWishlist ? 'bg-pink-50 text-pink-500 border-pink-500' : 'bg-white text-gray-800 border-gray-300 hover:border-gray-500'}`}
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                                    WISHLIST
+                                    <svg className="w-5 h-5" fill={isInWishlist ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    {isInWishlist ? 'WISHLISTED' : 'WISHLIST'}
                                 </button>
                             </div>
 

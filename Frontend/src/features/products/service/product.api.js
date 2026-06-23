@@ -15,8 +15,20 @@ export async function getSellerProduct() {
     return response.data
 }
 
-export async function getAllProducts(query = '') {
-    const url = query ? `/api/products/?q=${encodeURIComponent(query)}` : '/api/products/'
+export async function getAllProducts(queryParams = {}) {
+    // If it's a string, keep backward compatibility
+    let queryString = '';
+    if (typeof queryParams === 'string') {
+        queryString = queryParams ? `q=${encodeURIComponent(queryParams)}` : '';
+    } else {
+        const params = new URLSearchParams();
+        Object.entries(queryParams).forEach(([key, value]) => {
+            if (value) params.append(key, value);
+        });
+        queryString = params.toString();
+    }
+    
+    const url = queryString ? `/api/products/?${queryString}` : '/api/products/';
     const response = await api.get(url)
     return response.data
 }
